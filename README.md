@@ -70,7 +70,7 @@ newman/
 cd backend
 npm install
 node seed.js     # Seeds 50 products & warehouse locations
-npm start        # Launches server on http://localhost:5000
+npm start        # Launches server on https://aero-warehouse.onrender.com
 ```
 
 ### 2. Terminal 2: Frontend Web App
