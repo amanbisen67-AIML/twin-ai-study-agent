@@ -1,0 +1,19 @@
+{
+  "name": "warehouse-inventory-backend",
+  "version": "1.0.0",
+  "description": "Production-Ready E-Commerce Warehouse Inventory Backend with Socket.io, Auto-Buy, and QR Engine",
+  "main": "server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node server.js",
+    "seed": "node seed.js",
+    "dev": "node --watch server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "qrcode": "^1.5.4",
+    "socket.io": "^4.8.1"
+  }
+}
