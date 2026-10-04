@@ -1,39 +1,21 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* Twin - Digital Twin AI Study Agent Root CSS */
+@import "./styles/twin-instrument.css";
 
-@layer base {
-  body {
-    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-  }
-  
-  code, pre, .font-mono {
-    font-family: 'JetBrains Mono', monospace;
-  }
-}
-
-/* Custom modern scrollbar for warehouse data tables and activity feeds */
+/* High-precision scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #0d1322;
+  background: var(--bg-base);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #1e293b;
-  border-radius: 4px;
+  background: var(--border-line);
+  border-radius: var(--radius-sm);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #334155;
-}
-
-/* Glassmorphic card utility */
-.glass-panel {
-  background: rgba(19, 27, 46, 0.75);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--accent-cyan);
 }

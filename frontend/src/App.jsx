@@ -1,230 +1,183 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { socket } from './socket';
-import Header from './components/Header';
-import WorkerView from './components/WorkerView';
-import AdminDashboard from './components/AdminDashboard';
-import QrGeneratorModal from './components/QrGeneratorModal';
-import { sounds } from './components/SoundEffects';
+import React, { useState, useEffect, useCallback } from "react";
+import { Header } from "./components/Header";
+import { Dashboard } from "./components/Dashboard";
+import { WeeklyPlanView } from "./components/WeeklyPlanView";
+import { QuestionDrawer } from "./components/QuestionDrawer";
+import { AttemptModal } from "./components/AttemptModal";
+import { RunwaySkeleton } from "./components/Skeletons";
+import {
+  fetchTopicAnalysis,
+  fetchLatestWeeklyPlan,
+  generateWeeklyPlan,
+  recordQuizAttempt,
+  syncLeetCodeScraper
+} from "./api/client";
+import "./styles/twin-instrument.css";
 
-export default function App() {
-  const [currentView, setCurrentView] = useState('worker'); // 'worker' | 'admin'
-  const [isConnected, setIsConnected] = useState(socket.connected);
-  const [stats, setStats] = useState(null);
-  const [inventory, setInventory] = useState([]);
-  const [products, setProducts] = useState([]);
-  const [purchaseOrders, setPurchaseOrders] = useState([]);
-  const [workerActions, setWorkerActions] = useState([]);
-  const [qrModalOpen, setQrModalOpen] = useState(false);
-  const [selectedSkuForQr, setSelectedSkuForQr] = useState(null);
+export function App() {
+  const [activeView, setActiveView] = useState("dashboard"); // "dashboard" | "plan"
+  const [analysis, setAnalysis] = useState(null);
+  const [plan, setPlan] = useState(null);
+  
+  const [isLoadingAnalysis, setIsLoadingAnalysis] = useState(true);
+  const [isLoadingPlan, setIsLoadingPlan] = useState(true);
+  const [isGeneratingPlan, setIsGeneratingPlan] = useState(false);
+  const [generationProgress, setGenerationProgress] = useState(0);
+  const [generationMessage, setGenerationMessage] = useState("");
 
-  // Fetch warehouse state from backend
-  const fetchStats = async () => {
+  const [isAttemptModalOpen, setIsAttemptModalOpen] = useState(false);
+  const [isSyncingScraper, setIsSyncingScraper] = useState(false);
+  
+  // Drawer state
+  const [drawerQuestion, setDrawerQuestion] = useState(null);
+  const [drawerSession, setDrawerSession] = useState(null);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+
+  // Load baseline data on mount
+  const loadInitialData = useCallback(async () => {
+    setIsLoadingAnalysis(true);
+    setIsLoadingPlan(true);
     try {
-      const res = await fetch('/api/stats');
-      const data = await res.json();
-      setStats(data);
-    } catch (e) {
-      console.error('Error fetching stats:', e);
+      const [analysisData, planData] = await Promise.all([
+        fetchTopicAnalysis(),
+        fetchLatestWeeklyPlan()
+      ]);
+      setAnalysis(analysisData);
+      setPlan(planData);
+    } catch (err) {
+      console.error("Failed to load Twin study agent data:", err);
+    } finally {
+      setIsLoadingAnalysis(false);
+      setIsLoadingPlan(false);
     }
-  };
-
-  const fetchInventory = async () => {
-    try {
-      const res = await fetch('/api/inventory');
-      const data = await res.json();
-      setInventory(data);
-    } catch (e) {
-      console.error('Error fetching inventory:', e);
-    }
-  };
-
-  const fetchProducts = async () => {
-    try {
-      const res = await fetch('/api/products');
-      const data = await res.json();
-      setProducts(data);
-    } catch (e) {
-      console.error('Error fetching products:', e);
-    }
-  };
-
-  const fetchPurchaseOrders = async () => {
-    try {
-      const res = await fetch('/api/purchase-orders');
-      const data = await res.json();
-      setPurchaseOrders(data);
-    } catch (e) {
-      console.error('Error fetching POs:', e);
-    }
-  };
-
-  const fetchMovements = async () => {
-    try {
-      const res = await fetch('/api/movements');
-      const data = await res.json();
-      const initialActions = data.map((m) => ({
-        type: m.type,
-        sku: m.sku,
-        title: `${m.worker_name} ${m.type === 'PICK' ? 'Picked Item' : 'Restocked'}`,
-        description: `${m.quantity_change > 0 ? '+' : ''}${m.quantity_change} units at ${m.location_code || 'Bin'}`,
-        timestamp: m.timestamp
-      }));
-      setWorkerActions(initialActions);
-    } catch (e) {
-      console.error('Error fetching movements:', e);
-    }
-  };
-
-  const refreshAll = useCallback(() => {
-    fetchStats();
-    fetchInventory();
-    fetchProducts();
-    fetchPurchaseOrders();
-    fetchMovements();
   }, []);
 
-  // Initial load & Socket.io listeners
   useEffect(() => {
-    refreshAll();
+    loadInitialData();
+  }, [loadInitialData]);
 
-    function onConnect() {
-      setIsConnected(true);
-    }
-
-    function onDisconnect() {
-      setIsConnected(false);
-    }
-
-    // Real-Time Stock Update (pick or restock)
-    function onStockUpdate(data) {
-      console.log('⚡ [SOCKET] stockUpdate received:', data);
-      
-      // Update inventory table in state
-      setInventory((prev) =>
-        prev.map((item) => {
-          if (item.sku === data.sku && (item.location_code === data.location_code || !data.location_code)) {
-            return {
-              ...item,
-              quantity: data.remaining_quantity
-            };
-          }
-          return item;
-        })
-      );
-
-      // Refresh aggregate stats
-      fetchStats();
-    }
-
-    // Real-Time Auto-Buy Alert
-    function onAutoBuyTriggered(data) {
-      console.log('🚨 [SOCKET] autoBuyTriggered received:', data);
-      sounds.playAlert();
-      
-      // Add PO to top of state
-      if (data.po) {
-        setPurchaseOrders((prev) => [
-          {
-            ...data.po,
-            sku: data.product.sku,
-            product_name: data.product.name,
-            category: data.product.category,
-            reorder_level: data.product.reorder_level
-          },
-          ...prev
-        ]);
-      }
-      fetchStats();
-    }
-
-    // Live Worker Activity Stream Event
-    function onWorkerAction(action) {
-      console.log('👷 [SOCKET] workerAction:', action);
-      setWorkerActions((prev) => [action, ...prev.slice(0, 40)]);
-    }
-
-    socket.on('connect', onConnect);
-    socket.on('disconnect', onDisconnect);
-    socket.on('stockUpdate', onStockUpdate);
-    socket.on('autoBuyTriggered', onAutoBuyTriggered);
-    socket.on('workerAction', onWorkerAction);
-
-    return () => {
-      socket.off('connect', onConnect);
-      socket.off('disconnect', onDisconnect);
-      socket.off('stockUpdate', onStockUpdate);
-      socket.off('autoBuyTriggered', onAutoBuyTriggered);
-      socket.off('workerAction', onWorkerAction);
-    };
-  }, [refreshAll]);
-
-  // Handle PO Receiving / Restocking
-  const handleReceivePO = async (poId) => {
+  // Log Attempt Handler
+  const handleLogAttempt = async (attemptData) => {
     try {
-      const res = await fetch(`/api/purchase-orders/${poId}/receive`, {
-        method: 'POST'
+      await recordQuizAttempt({
+        student_id: "student_alex_chen",
+        ...attemptData
       });
-      const data = await res.json();
-      if (data.success) {
-        refreshAll();
-      }
-    } catch (e) {
-      console.error('Error receiving PO:', e);
+      // Refresh analysis immediately to re-compute recency decay and terrain
+      const updatedAnalysis = await fetchTopicAnalysis();
+      setAnalysis(updatedAnalysis);
+    } catch (err) {
+      console.error("Failed to record attempt:", err);
     }
   };
 
-  const handleOpenQrModal = (sku) => {
-    setSelectedSkuForQr(sku || (products[0] ? products[0].sku : null));
-    setQrModalOpen(true);
+  // Generate New Plan Handler
+  const handleGeneratePlan = async () => {
+    setIsGeneratingPlan(true);
+    setGenerationProgress(0.05);
+    setGenerationMessage("Initiating autonomous revision planning...");
+    try {
+      const newPlan = await generateWeeklyPlan(
+        "student_alex_chen",
+        7,
+        (progress, message) => {
+          setGenerationProgress(progress);
+          setGenerationMessage(message);
+        }
+      );
+      setPlan(newPlan);
+      // Switch view to plan to see newly generated runway
+      setActiveView("plan");
+    } catch (err) {
+      console.error("Plan generation failed:", err);
+    } finally {
+      setIsGeneratingPlan(false);
+      setGenerationProgress(1.0);
+    }
+  };
+
+  // Sync LeetCode Scraper
+  const handleSyncLeetCode = async () => {
+    setIsSyncingScraper(true);
+    try {
+      await syncLeetCodeScraper();
+      // Reload initial data to incorporate any freshly synced question templates
+      const [analysisData, planData] = await Promise.all([
+        fetchTopicAnalysis(),
+        fetchLatestWeeklyPlan()
+      ]);
+      setAnalysis(analysisData);
+      setPlan(planData);
+    } catch (err) {
+      console.error("LeetCode sync failed:", err);
+    } finally {
+      setIsSyncingScraper(false);
+    }
+  };
+
+  const handleOpenQuestionDrawer = (question, session) => {
+    if (!question && session?.questions?.length > 0) {
+      setDrawerQuestion(session.questions[0]);
+    } else {
+      setDrawerQuestion(question);
+    }
+    setDrawerSession(session);
+    setIsDrawerOpen(true);
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#0a0e17] text-slate-100">
-      
-      {/* Sticky Header with Navigation & Socket.io badge */}
+    <div className="twin-app-container">
+      {/* Instrument Header */}
       <Header
-        currentView={currentView}
-        setCurrentView={setCurrentView}
-        isConnected={isConnected}
-        stats={stats}
-        onOpenQrModal={() => handleOpenQrModal(null)}
+        activeView={activeView}
+        onViewChange={setActiveView}
+        onOpenAttemptModal={() => setIsAttemptModalOpen(true)}
+        onSyncLeetCode={handleSyncLeetCode}
+        isSyncingScraper={isSyncingScraper}
+        studentName="Alex Chen"
+        targetRole="Senior Java Backend Engineer"
       />
 
-      {/* Main View Container */}
-      <main className="flex-1 p-4 sm:p-6 lg:p-8">
-        {currentView === 'worker' ? (
-          <WorkerView
-            onPickCompleted={() => {
-              fetchStats();
-              fetchInventory();
-              fetchPurchaseOrders();
-            }}
-          />
+      {/* Main Screen Content */}
+      {activeView === "dashboard" ? (
+        <Dashboard
+          analysis={analysis}
+          isLoading={isLoadingAnalysis}
+          onSelectTopic={(topic) => {
+            // Could filter or highlight
+          }}
+        />
+      ) : (
+        isLoadingPlan ? (
+          <RunwaySkeleton />
         ) : (
-          <AdminDashboard
-            inventory={inventory}
-            purchaseOrders={purchaseOrders}
-            workerActions={workerActions}
-            onReceivePO={handleReceivePO}
-            onOpenQrModal={handleOpenQrModal}
-            refreshAll={refreshAll}
+          <WeeklyPlanView
+            plan={plan}
+            onGenerateNewPlan={handleGeneratePlan}
+            isGenerating={isGeneratingPlan}
+            generationProgress={generationProgress}
+            generationMessage={generationMessage}
+            onOpenQuestionDrawer={handleOpenQuestionDrawer}
           />
-        )}
-      </main>
+        )
+      )}
 
-      {/* Cryptographic QR ItemTag Generator Modal */}
-      <QrGeneratorModal
-        isOpen={qrModalOpen}
-        onClose={() => setQrModalOpen(false)}
-        initialSku={selectedSkuForQr}
-        products={products}
+      {/* Interactive Practice Question Slide-Over Drawer */}
+      <QuestionDrawer
+        isOpen={isDrawerOpen}
+        onClose={() => setIsDrawerOpen(false)}
+        question={drawerQuestion}
+        session={drawerSession}
       />
 
-      {/* Footer */}
-      <footer className="border-t border-slate-800/80 bg-[#0d1322] py-4 text-center text-xs text-slate-500 font-mono">
-        AERO-WAREHOUSE OS • SQLite Zero-Config • Socket.io Realtime • Straight-Line Pick Route Optimizer
-      </footer>
-
+      {/* Real-Time Quiz Attempt Logger Modal */}
+      <AttemptModal
+        isOpen={isAttemptModalOpen}
+        onClose={() => setIsAttemptModalOpen(false)}
+        onLogAttempt={handleLogAttempt}
+      />
     </div>
   );
 }
+
+export default App;

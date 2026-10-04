@@ -1,12 +1,13 @@
 {
-  "name": "warehouse-inventory-system-monorepo",
-  "version": "1.0.0",
+  "name": "twin-ai-study-agent",
+  "version": "2.0.0",
   "private": true,
-  "description": "Production-Ready E-Commerce Warehouse Inventory System (Next-Gen)",
+  "description": "Twin — Digital Twin AI Study Agent with Recency-Weighted Accuracy, Smoothed Weak-Topic Terrain, and LeetCode Java Practice Engine",
   "scripts": {
-    "setup": "npm --prefix backend install && npm --prefix frontend install && npm --prefix backend run seed",
-    "seed": "npm --prefix backend run seed",
-    "backend": "npm --prefix backend start",
-    "frontend": "npm --prefix frontend run dev"
+    "seed": ".\\.venv\\Scripts\\python.exe backend/seed_data.py",
+    "test:backend": "$env:PYTHONPATH='backend'; .\\.venv\\Scripts\\pytest.exe backend/tests -v",
+    "backend": "$env:PYTHONPATH='backend'; .\\.venv\\Scripts\\python.exe -m uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload",
+    "frontend": "npm --prefix frontend run dev",
+    "build": "npm --prefix frontend run build"
   }
 }

@@ -1,0 +1,361 @@
+[
+  {
+    "id": "lc_java_001",
+    "topic": "Arrays & Hashing",
+    "title": "Two Sum",
+    "difficulty": "Easy",
+    "leetcode_slug": "two-sum",
+    "description": "Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target. You may assume that each input would have exactly one solution, and you may not use the same element twice.",
+    "constraints": [
+      "2 <= nums.length <= 10^4",
+      "-10^9 <= nums[i] <= 10^9",
+      "-10^9 <= target <= 10^9",
+      "Only one valid answer exists."
+    ],
+    "examples": [
+      {
+        "input": "nums = [2,7,11,15], target = 9",
+        "expected_output": "[0,1]",
+        "explanation": "Because nums[0] + nums[1] == 9, we return [0, 1]."
+      },
+      {
+        "input": "nums = [3,2,4], target = 6",
+        "expected_output": "[1,2]",
+        "explanation": "nums[1] + nums[2] == 6, return [1, 2]."
+      }
+    ],
+    "java_starter_code": "class Solution {\n    public int[] twoSum(int[] nums, int target) {\n        // TODO: Implement O(N) one-pass HashMap solution\n        return new int[0];\n    }\n}",
+    "solution_approach": "Maintain a HashMap<Integer, Integer> mapping each number to its index. For each element num at index i, compute complement = target - num. If map.containsKey(complement), return new int[]{map.get(complement), i}. Otherwise, insert num -> i into map.",
+    "time_complexity": "O(N)",
+    "space_complexity": "O(N)",
+    "java_tips": [
+      "Use Map<Integer, Integer> map = new HashMap<>() for O(1) average lookup.",
+      "Initialize HashMap with capacity (nums.length * 4 / 3 + 1) to avoid rehash overhead."
+    ]
+  },
+  {
+    "id": "lc_java_002",
+    "topic": "Arrays & Hashing",
+    "title": "Group Anagrams",
+    "difficulty": "Medium",
+    "leetcode_slug": "group-anagrams",
+    "description": "Given an array of strings strs, group the anagrams together. You can return the answer in any order. An Anagram is a word or phrase formed by rearranging the letters of a different word or phrase.",
+    "constraints": [
+      "1 <= strs.length <= 10^4",
+      "0 <= strs[i].length <= 100",
+      "strs[i] consists of lowercase English letters."
+    ],
+    "examples": [
+      {
+        "input": "strs = [\"eat\",\"tea\",\"tan\",\"ate\",\"nat\",\"bat\"]",
+        "expected_output": "[[\"bat\"],[\"nat\",\"tan\"],[\"ate\",\"eat\",\"tea\"]]",
+        "explanation": "Anagram groups matched by canonical character counts."
+      }
+    ],
+    "java_starter_code": "class Solution {\n    public List<List<String>> groupAnagrams(String[] strs) {\n        // TODO: Group words by sorted char array or count signature\n        return new ArrayList<>();\n    }\n}",
+    "solution_approach": "Use a HashMap<String, List<String>>. For each string, convert to char[], sort with Arrays.sort(chars), create key = new String(chars), and append to map.computeIfAbsent(key, k -> new ArrayList<>()).",
+    "time_complexity": "O(N * K log K) where K is max string length",
+    "space_complexity": "O(N * K)",
+    "java_tips": [
+      "Prefer map.computeIfAbsent(key, k -> new ArrayList<>()).add(s) over containsKey + get.",
+      "Always construct String key via new String(charArr) rather than charArr.toString()."
+    ]
+  },
+  {
+    "id": "lc_java_003",
+    "topic": "Two Pointers",
+    "title": "3Sum",
+    "difficulty": "Medium",
+    "leetcode_slug": "3sum",
+    "description": "Given an integer array nums, return all the triplets [nums[i], nums[j], nums[k]] such that i != j, i != k, and j != k, and nums[i] + nums[j] + nums[k] == 0. Notice that the solution set must not contain duplicate triplets.",
+    "constraints": [
+      "3 <= nums.length <= 3000",
+      "-10^5 <= nums[i] <= 10^5"
+    ],
+    "examples": [
+      {
+        "input": "nums = [-1,0,1,2,-1,-4]",
+        "expected_output": "[[-1,-1,2],[-1,0,1]]",
+        "explanation": "Distinct triplets summing to zero without duplicate groupings."
+      }
+    ],
+    "java_starter_code": "class Solution {\n    public List<List<String>> threeSum(int[] nums) {\n        // TODO: Sort array, fix first element, and use left/right two-pointers\n        return new ArrayList<>();\n    }\n}",
+    "solution_approach": "Sort nums. Iterate i from 0 to n-3. Skip duplicates (nums[i] == nums[i-1]). Set left = i + 1, right = n - 1. While left < right, calculate sum = nums[i] + nums[left] + nums[right]. If sum == 0, add to result and advance pointers past duplicates; if sum < 0, left++; else right--.",
+    "time_complexity": "O(N^2)",
+    "space_complexity": "O(1) auxiliary (or O(log N) for sorting stack)",
+    "java_tips": [
+      "Arrays.sort(nums) in Java uses Dual-Pivot Quicksort for primitives (O(N log N)).",
+      "Avoid List<Integer> boxing until adding triplets to result using Arrays.asList(nums[i], nums[left], nums[right])."
+    ]
+  },
+  {
+    "id": "lc_java_004",
+    "topic": "Two Pointers",
+    "title": "Container With Most Water",
+    "difficulty": "Medium",
+    "leetcode_slug": "container-with-most-water",
+    "description": "You are given an integer array height of length n. There are n vertical lines drawn such that the two endpoints of the ith line are (i, 0) and (i, height[i]). Find two lines that together with the x-axis form a container, such that the container contains the most water. Return the maximum amount of water a container can store.",
+    "constraints": [
+      "n == height.length",
+      "2 <= n <= 10^5",
+      "0 <= height[i] <= 10^4"
+    ],
+    "examples": [
+      {
+        "input": "height = [1,8,6,2,5,4,8,3,7]",
+        "expected_output": "49",
+        "explanation": "Max area is between index 1 (height 8) and index 8 (height 7): min(8, 7) * (8 - 1) = 49."
+      }
+    ],
+    "java_starter_code": "class Solution {\n    public int maxArea(int[] height) {\n        // TODO: Inward two pointers squeezing the shorter wall\n        return 0;\n    }\n}",
+    "solution_approach": "Place left = 0, right = n - 1. In each step, calculate area = Math.min(height[left], height[right]) * (right - left), update maxArea. Move pointer pointing to shorter height inward.",
+    "time_complexity": "O(N)",
+    "space_complexity": "O(1)",
+    "java_tips": [
+      "Use Math.max() and Math.min() directly with primitive ints to avoid autoboxing.",
+      "Greedy two-pointer contraction works because moving the taller wall can never increase area."
+    ]
+  },
+  {
+    "id": "lc_java_005",
+    "topic": "Sliding Window",
+    "title": "Longest Substring Without Repeating Characters",
+    "difficulty": "Medium",
+    "leetcode_slug": "longest-substring-without-repeating-characters",
+    "description": "Given a string s, find the length of the longest substring without repeating characters.",
+    "constraints": [
+      "0 <= s.length <= 5 * 10^4",
+      "s consists of English letters, digits, symbols and spaces."
+    ],
+    "examples": [
+      {
+        "input": "s = \"abcabcbb\"",
+        "expected_output": "3",
+        "explanation": "The answer is \"abc\", with the length of 3."
+      },
+      {
+        "input": "s = \"bbbbb\"",
+        "expected_output": "1",
+        "explanation": "The answer is \"b\", with the length of 1."
+      }
+    ],
+    "java_starter_code": "class Solution {\n    public int lengthOfLongestSubstring(String s) {\n        // TODO: Dynamic sliding window with last seen character index\n        return 0;\n    }\n}",
+    "solution_approach": "Use an int[128] array or HashMap<Character, Integer> to record the most recent index of each character. Maintain window [left, right]. When charAt(right) was previously seen at idx >= left, move left = idx + 1. Update maxLen = Math.max(maxLen, right - left + 1).",
+    "time_complexity": "O(N)",
+    "space_complexity": "O(min(M, N)) where M is character set size",
+    "java_tips": [
+      "For ASCII strings, int[] lastSeen = new int[128] initialized with -1 is 5x faster than Map<Character, Integer>.",
+      "Use s.charAt(i) without converting toCharArray() to preserve zero heap allocations."
+    ]
+  },
+  {
+    "id": "lc_java_006",
+    "topic": "Binary Search",
+    "title": "Search in Rotated Sorted Array",
+    "difficulty": "Medium",
+    "leetcode_slug": "search-in-rotated-sorted-array",
+    "description": "There is an integer array nums sorted in ascending order (with distinct values), rotated at an unknown pivot index. Given array nums and target, return index of target if it is in nums, or -1 if it is not in nums.",
+    "constraints": [
+      "1 <= nums.length <= 5000",
+      "-10^4 <= nums[i] <= 10^4",
+      "All values of nums are unique."
+    ],
+    "examples": [
+      {
+        "input": "nums = [4,5,6,7,0,1,2], target = 0",
+        "expected_output": "4",
+        "explanation": "Target 0 located at index 4."
+      }
+    ],
+    "java_starter_code": "class Solution {\n    public int search(int[] nums, int target) {\n        // TODO: Binary search checking which half is cleanly sorted\n        return -1;\n    }\n}",
+    "solution_approach": "Standard binary search with pivot analysis. In each step, calculate mid = low + (high - low) / 2. If nums[low] <= nums[mid], the left half is sorted. Check if target lies within [nums[low], nums[mid]]. If yes, high = mid - 1; else low = mid + 1. Otherwise, right half is sorted.",
+    "time_complexity": "O(log N)",
+    "space_complexity": "O(1)",
+    "java_tips": [
+      "Always compute mid = low + (high - low) / 2 to avoid 32-bit signed integer overflow in Java.",
+      "Check nums[low] <= nums[mid] (inclusive <=) to handle 2-element sub-arrays."
+    ]
+  },
+  {
+    "id": "lc_java_007",
+    "topic": "Trees & Binary Search Trees",
+    "title": "Validate Binary Search Tree",
+    "difficulty": "Medium",
+    "leetcode_slug": "validate-binary-search-tree",
+    "description": "Given the root of a binary tree, determine if it is a valid binary search tree (BST). A valid BST is defined as: The left subtree of a node contains only nodes with keys strictly less than the node's key; the right subtree contains only nodes with keys strictly greater than the node's key; both subtrees must also be binary search trees.",
+    "constraints": [
+      "The number of nodes in the tree is in the range [1, 10^4].",
+      "-2^31 <= Node.val <= 2^31 - 1"
+    ],
+    "examples": [
+      {
+        "input": "root = [2,1,3]",
+        "expected_output": "true",
+        "explanation": "Valid BST where 1 < 2 < 3."
+      },
+      {
+        "input": "root = [5,1,4,null,null,3,6]",
+        "expected_output": "false",
+        "explanation": "Root value is 5, but its right child value 4 violates BST property."
+      }
+    ],
+    "java_starter_code": "/**\n * Definition for a binary tree node.\n * public class TreeNode {\n *     int val;\n *     TreeNode left;\n *     TreeNode right;\n *     TreeNode(int val) { this.val = val; }\n * }\n */\nclass Solution {\n    public boolean isValidBST(TreeNode root) {\n        // TODO: Helper method passing Long.MIN_VALUE and Long.MAX_VALUE bounds\n        return validate(root, Long.MIN_VALUE, Long.MAX_VALUE);\n    }\n    \n    private boolean validate(TreeNode node, long min, long max) {\n        if (node == null) return true;\n        if (node.val <= min || node.val >= max) return false;\n        return validate(node.left, min, node.val) && validate(node.right, node.val, max);\n    }\n}",
+    "solution_approach": "Recursive range validation with min and max bounds. Since node values can reach Integer.MIN_VALUE and Integer.MAX_VALUE, use long data types for bounds to prevent edge case overflow.",
+    "time_complexity": "O(N)",
+    "space_complexity": "O(H) recursion stack where H is tree height",
+    "java_tips": [
+      "Beware: Node.val can be Integer.MIN_VALUE or Integer.MAX_VALUE! Use long min/max bounds instead of Integer.MIN_VALUE.",
+      "In-order traversal should be strictly monotonically increasing."
+    ]
+  },
+  {
+    "id": "lc_java_008",
+    "topic": "Graphs & BFS/DFS",
+    "title": "Number of Islands",
+    "difficulty": "Medium",
+    "leetcode_slug": "number-of-islands",
+    "description": "Given an m x n 2D binary grid grid which represents a map of '1's (land) and '0's (water), return the number of islands. An island is surrounded by water and is formed by connecting adjacent lands horizontally or vertically.",
+    "constraints": [
+      "m == grid.length",
+      "n == grid[i].length",
+      "1 <= m, n <= 300",
+      "grid[i][j] is '0' or '1'."
+    ],
+    "examples": [
+      {
+        "input": "grid = [[\"1\",\"1\",\"0\",\"0\",\"0\"],[\"1\",\"1\",\"0\",\"0\",\"0\"],[\"0\",\"0\",\"1\",\"0\",\"0\"],[\"0\",\"0\",\"0\",\"1\",\"1\"]]",
+        "expected_output": "3",
+        "explanation": "Three distinct disconnected land clusters."
+      }
+    ],
+    "java_starter_code": "class Solution {\n    public int numIslands(char[][] grid) {\n        // TODO: Traverse grid and sink islands using recursive DFS or Queue BFS\n        return 0;\n    }\n}",
+    "solution_approach": "Scan every cell (r, c). When grid[r][c] == '1', increment island count and execute DFS to sink all connected land cells by setting grid[r][c] = '0'. Recursively visit top, bottom, left, right.",
+    "time_complexity": "O(M * N)",
+    "space_complexity": "O(M * N) worst-case recursive call stack",
+    "java_tips": [
+      "Sink land in-place by setting grid[r][c] = '0' to avoid allocating boolean[][] visited.",
+      "Check boundary conditions `r < 0 || r >= m || c < 0 || c >= n || grid[r][c] != '1'` at top of DFS."
+    ]
+  },
+  {
+    "id": "lc_java_009",
+    "topic": "Graphs & BFS/DFS",
+    "title": "Course Schedule",
+    "difficulty": "Medium",
+    "leetcode_slug": "course-schedule",
+    "description": "There are a total of numCourses courses you have to take, labeled from 0 to numCourses - 1. You are given an array prerequisites where prerequisites[i] = [ai, bi] indicates that you must take course bi first if you want to take course ai. Return true if you can finish all courses. Otherwise, return false.",
+    "constraints": [
+      "1 <= numCourses <= 2000",
+      "0 <= prerequisites.length <= 5000",
+      "prerequisites[i].length == 2",
+      "All prerequisite pairs are unique."
+    ],
+    "examples": [
+      {
+        "input": "numCourses = 2, prerequisites = [[1,0]]",
+        "expected_output": "true",
+        "explanation": "Course 0 -> Course 1. No cycles."
+      },
+      {
+        "input": "numCourses = 2, prerequisites = [[1,0],[0,1]]",
+        "expected_output": "false",
+        "explanation": "Cyclic prerequisite dependency."
+      }
+    ],
+    "java_starter_code": "class Solution {\n    public boolean canFinish(int numCourses, int[][] prerequisites) {\n        // TODO: Kahn's Algorithm (Topological Sort BFS) using in-degrees\n        return false;\n    }\n}",
+    "solution_approach": "Build adjacency list List<List<Integer>> and in-degree array int[] inDegree. Enqueue all nodes with inDegree == 0 into an ArrayDeque. While queue not empty, pop course, increment count, decrement in-degree of downstream courses. If downstream in-degree hits 0, enqueue. Return count == numCourses.",
+    "time_complexity": "O(V + E)",
+    "space_complexity": "O(V + E)",
+    "java_tips": [
+      "Use ArrayDeque<Integer> instead of LinkedList for Queue in Java (cache friendly, faster).",
+      "Represent graph as List<Integer>[] graph = new ArrayList[numCourses] to minimize pointer chasing."
+    ]
+  },
+  {
+    "id": "lc_java_010",
+    "topic": "Dynamic Programming",
+    "title": "Coin Change",
+    "difficulty": "Medium",
+    "leetcode_slug": "coin-change",
+    "description": "You are given an integer array coins representing coins of different denominations and an integer amount representing a total amount of money. Return the fewest number of coins that you need to make up that amount. If that amount of money cannot be made up by any combination of the coins, return -1.",
+    "constraints": [
+      "1 <= coins.length <= 12",
+      "1 <= coins[i] <= 2^31 - 1",
+      "0 <= amount <= 10^4"
+    ],
+    "examples": [
+      {
+        "input": "coins = [1,2,5], amount = 11",
+        "expected_output": "3",
+        "explanation": "11 = 5 + 5 + 1 (3 coins)."
+      },
+      {
+        "input": "coins = [2], amount = 3",
+        "expected_output": "-1",
+        "explanation": "Cannot form 3 using only 2."
+      }
+    ],
+    "java_starter_code": "class Solution {\n    public int coinChange(int[] coins, int amount) {\n        // TODO: Bottom-up 1D DP table initialized to amount + 1\n        return -1;\n    }\n}",
+    "solution_approach": "Initialize int[] dp = new int[amount + 1]; Arrays.fill(dp, amount + 1); dp[0] = 0. For i from 1 to amount: for each coin in coins: if i - coin >= 0, dp[i] = Math.min(dp[i], dp[i - coin] + 1). Return dp[amount] > amount ? -1 : dp[amount].",
+    "time_complexity": "O(amount * coins.length)",
+    "space_complexity": "O(amount)",
+    "java_tips": [
+      "Initialize dp with (amount + 1) instead of Integer.MAX_VALUE to prevent integer overflow when adding + 1.",
+      "Arrays.fill(dp, amount + 1) is optimized via memset at the JVM bytecode layer."
+    ]
+  },
+  {
+    "id": "lc_java_011",
+    "topic": "Dynamic Programming",
+    "title": "Longest Increasing Subsequence",
+    "difficulty": "Medium",
+    "leetcode_slug": "longest-increasing-subsequence",
+    "description": "Given an integer array nums, return the length of the longest strictly increasing subsequence.",
+    "constraints": [
+      "1 <= nums.length <= 2500",
+      "-10^4 <= nums[i] <= 10^4"
+    ],
+    "examples": [
+      {
+        "input": "nums = [10,9,2,5,3,7,101,18]",
+        "expected_output": "4",
+        "explanation": "The longest increasing subsequence is [2,3,7,101], length 4."
+      }
+    ],
+    "java_starter_code": "class Solution {\n    public int lengthOfLIS(int[] nums) {\n        // TODO: Patience sorting / Binary Search in O(N log N)\n        return 0;\n    }\n}",
+    "solution_approach": "Maintain tails[] array storing minimum tail values of increasing subsequences of length i + 1. For each num: binary search tails to find first element >= num. If found, replace tails[idx] = num. If not found, append num to tails and expand size.",
+    "time_complexity": "O(N log N)",
+    "space_complexity": "O(N)",
+    "java_tips": [
+      "Can use Arrays.binarySearch(tails, 0, len, num) directly in Java. If negative, insertion point is -(idx + 1).",
+      "Strictly increasing condition requires replacing tails on equal element match."
+    ]
+  },
+  {
+    "id": "lc_java_012",
+    "topic": "Heap & PriorityQueue",
+    "title": "Kth Largest Element in an Array",
+    "difficulty": "Medium",
+    "leetcode_slug": "kth-largest-element-in-an-array",
+    "description": "Given an integer array nums and an integer k, return the kth largest element in the array. Note that it is the kth largest element in the sorted order, not the kth distinct element.",
+    "constraints": [
+      "1 <= k <= nums.length <= 10^5",
+      "-10^4 <= nums[i] <= 10^4"
+    ],
+    "examples": [
+      {
+        "input": "nums = [3,2,1,5,6,4], k = 2",
+        "expected_output": "5",
+        "explanation": "Sorted order: [1,2,3,4,5,6], 2nd largest is 5."
+      }
+    ],
+    "java_starter_code": "class Solution {\n    public int findKthLargest(int[] nums, int k) {\n        // TODO: Min-heap of size k or QuickSelect\n        return 0;\n    }\n}",
+    "solution_approach": "Use a min-heap PriorityQueue<Integer> with capacity k. Iterate nums, offering each element. If pq.size() > k, evict pq.poll(). At completion, root pq.peek() is the kth largest element.",
+    "time_complexity": "O(N log K)",
+    "space_complexity": "O(K)",
+    "java_tips": [
+      "In Java, PriorityQueue is by default a Min-Heap. For Max-Heap, use (a, b) -> Integer.compare(b, a) or Collections.reverseOrder().",
+      "Avoid new PriorityQueue<>((a, b) -> b - a) because subtraction can cause 32-bit signed integer underflow."
+    ]
+  }
+]
